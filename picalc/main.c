@@ -30,7 +30,7 @@
 extern void vApplicationIdleHook( void );
 void vDisplay(void *pvParameters);
 
-TaskHandle_t ledTask;
+TaskHandle_t DisplayTask;
 
 void vApplicationIdleHook( void )
 {	
@@ -39,7 +39,7 @@ void vApplicationIdleHook( void )
 
 int main(void)
 {
-    resetReason_t reason = getResetReason();
+   // resetReason_t reason = getResetReason();
 
 	vInitClock();
 	vInitDisplay();
