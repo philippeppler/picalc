@@ -26,10 +26,12 @@
 #include "utils.h"
 #include "errorHandler.h"
 #include "NHD0420Driver.h"
+#include "ButtonHandler.h"
 
 
 extern void vApplicationIdleHook( void );
 void vGUI(void *pvParameters);
+void vButton(void *pvParameters);
 
 TaskHandle_t GUITask;
 
@@ -43,6 +45,7 @@ int main(void)
 	vInitClock();
 	vInitDisplay();
 	
+	xTaskCreate( vButton, (const char *) "Button", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE, NULL, 2, &GUITask);
 
 	vTaskStartScheduler();
@@ -50,9 +53,8 @@ int main(void)
 }
 
 void vGUI(void *pvParameters) {
-	(void) pvParameters;
-	PORTF.DIRSET = PIN0_bm; /*LED1*/
-	PORTF.OUT = 0x01;
+	
+	
 	for(;;) {
 		vDisplayClear();
 		vDisplayWriteStringAtPos(0,0,"PI Calculator");
@@ -60,7 +62,32 @@ void vGUI(void *pvParameters) {
 		vDisplayWriteStringAtPos(2,0,"Pi: 3.1415xxx");
 		vDisplayWriteStringAtPos(3,0,"Zeit: xxxxxxms");
 		
-		PORTF.OUTTGL = 0x01;				
+		
 		vTaskDelay(500 / portTICK_RATE_MS);
+	}
+}
+
+void vButton(void *pvParameters) {
+	initButtons();
+	
+	while (1) {
+		updateButtons();
+		if (getButtonPress(BUTTON1) == SHORT_PRESSED) {
+
+		}
+
+		if (getButtonPress(BUTTON2) == SHORT_PRESSED) {
+
+		}
+		
+		if (getButtonPress(BUTTON3) == SHORT_PRESSED) {
+
+		}		
+
+		if (getButtonPress(BUTTON4) == SHORT_PRESSED) {
+
+		}
+
+		vTaskDelay((1000/BUTTON_UPDATE_FREQUENCY_HZ)/portTICK_RATE_MS);
 	}
 }
