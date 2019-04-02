@@ -31,14 +31,17 @@
 #include "NHD0420Driver.h"
 #include "ButtonHandler.h"
 
+#define ITERATIONS 100000
 
 extern void vApplicationIdleHook( void );
 void vGUI(void *pvParameters);
 void vButton(void *pvParameters);
+void vCalc(void *pvParameters);
 
 TaskHandle_t GUITask;
 
 double dPi4; 
+long i;
 
 
 void vApplicationIdleHook( void )
@@ -53,22 +56,23 @@ int main(void)
 	
 	xTaskCreate( vButton, (const char *) "Button", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE, NULL, 2, &GUITask);
+	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
 	vTaskStartScheduler();
 	return 0;
 }
 
 void vGUI(void *pvParameters) {
-	dPi4 = 3.14152345678;
-	char Pi[10] = "";			// NMEA Inputstring des GPS-Sensors
-	
+	char Pi[10] = "";			
+	char Iter[15] = "";
 	for(;;) {
 
-		sprintf(Pi, "%f", dPi4);
+		sprintf(Pi, "%f", 4*dPi4);
+		sprintf(Iter, "%ld", i);
 		
 		vDisplayClear();
 		vDisplayWriteStringAtPos(0,0,"PI Calculator");
-		vDisplayWriteStringAtPos(1,0,"Philipp Eppler");
+		vDisplayWriteStringAtPos(1,0,"%s", Iter);
 		vDisplayWriteStringAtPos(2,0,"Pi: %s", Pi);
 		vDisplayWriteStringAtPos(3,0,"Zeit: xxxxxxms");
 		
@@ -101,3 +105,15 @@ void vButton(void *pvParameters) {
 		vTaskDelay((1000/BUTTON_UPDATE_FREQUENCY_HZ)/portTICK_RATE_MS);
 	}
 }
+
+void vCalc(void *pvParameters) {
+	dPi4 = 1;
+	
+	for(i = 0;i<ITERATIONS;i++) {
+		dPi4 = dPi4 - (1.0/(3+4*i)) + (1.0/(5+4*i));
+		vTaskDelay(1/portTICK_RATE_MS);
+	}
+	
+}
+	
+	
