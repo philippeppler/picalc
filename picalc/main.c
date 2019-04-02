@@ -28,7 +28,7 @@
 
 
 extern void vApplicationIdleHook( void );
-void vLedBlink(void *pvParameters);
+void vDisplay(void *pvParameters);
 
 TaskHandle_t ledTask;
 
@@ -44,18 +44,18 @@ int main(void)
 	vInitClock();
 	vInitDisplay();
 	
-	xTaskCreate( vLedBlink, (const char *) "ledBlink", configMINIMAL_STACK_SIZE+10, NULL, 1, &ledTask);
+	xTaskCreate( vDisplay, (const char *) "DisplayTask", configMINIMAL_STACK_SIZE, NULL, 1, &DisplayTask);
 
 	vDisplayClear();
-	vDisplayWriteStringAtPos(0,0,"FreeRTOS 10.0.1");
-	vDisplayWriteStringAtPos(1,0,"EDUBoard 1.0");
-	vDisplayWriteStringAtPos(2,0,"Template");
-	vDisplayWriteStringAtPos(3,0,"ResetReason: %d", reason);
+	vDisplayWriteStringAtPos(0,0,"PI Calculator");
+	vDisplayWriteStringAtPos(1,0,"Philipp Eppler");
+	vDisplayWriteStringAtPos(2,0,"Pi: 3.1415xxx");
+	vDisplayWriteStringAtPos(3,0,"Zeit: xxxxxxms");
 	vTaskStartScheduler();
 	return 0;
 }
 
-void vLedBlink(void *pvParameters) {
+void vDisplay(void *pvParameters) {
 	(void) pvParameters;
 	PORTF.DIRSET = PIN0_bm; /*LED1*/
 	PORTF.OUT = 0x01;
@@ -69,6 +69,6 @@ void vLedBlink(void *pvParameters) {
 // 		vDisplayWriteStringAtPos(2,0,"TaskStack: %d", taskStack);
 // 		vDisplayWriteStringAtPos(3,0,"FreeSpace: %d", stack+heap);
 		PORTF.OUTTGL = 0x01;				
-		vTaskDelay(100 / portTICK_RATE_MS);
+		vTaskDelay(500 / portTICK_RATE_MS);
 	}
 }
