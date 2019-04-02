@@ -6,6 +6,9 @@
  */ 
 
 //#include <avr/io.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "avr_compiler.h"
 #include "pmic_driver.h"
 #include "TC_driver.h"
@@ -35,6 +38,9 @@ void vButton(void *pvParameters);
 
 TaskHandle_t GUITask;
 
+double dPi4; 
+
+
 void vApplicationIdleHook( void )
 {	
 	
@@ -53,16 +59,20 @@ int main(void)
 }
 
 void vGUI(void *pvParameters) {
-	
+	dPi4 = 3.14152345678;
+	char Pi[10] = "";			// NMEA Inputstring des GPS-Sensors
 	
 	for(;;) {
+
+		sprintf(Pi, "%f", dPi4);
+		
 		vDisplayClear();
 		vDisplayWriteStringAtPos(0,0,"PI Calculator");
 		vDisplayWriteStringAtPos(1,0,"Philipp Eppler");
-		vDisplayWriteStringAtPos(2,0,"Pi: 3.1415xxx");
+		vDisplayWriteStringAtPos(2,0,"Pi: %s", Pi);
 		vDisplayWriteStringAtPos(3,0,"Zeit: xxxxxxms");
 		
-		
+
 		vTaskDelay(500 / portTICK_RATE_MS);
 	}
 }
