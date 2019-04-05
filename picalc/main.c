@@ -148,7 +148,7 @@ void vCalc(void *pvParameters) {
 		
 		
 		
-		vTaskDelay(1/portTICK_RATE_MS);
+		//vTaskDelay(1/portTICK_RATE_MS);
 	}
 	
 }
