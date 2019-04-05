@@ -35,7 +35,7 @@
 
 // EventGroup
 #define STARTCALC	1<<0
-#define STOPCALC	1<<1
+//#define STOPCALC	1<<1
 #define RESETCALC	1<<2
 #define FINISHCALC	1<<3
 EventGroupHandle_t egPiStates;
@@ -47,7 +47,8 @@ void vCalc(void *pvParameters);
 
 TaskHandle_t GUITask;
 
-double dPi4; 
+double dPi4;
+long i;
 
 
 void vApplicationIdleHook( void )
@@ -95,11 +96,11 @@ void vButton(void *pvParameters) {
 		updateButtons();
 		if (getButtonPress(BUTTON1) == SHORT_PRESSED) {
 			xEventGroupSetBits(egPiStates, STARTCALC);
-			xEventGroupClearBits(egPiStates, STOPCALC);
+//			xEventGroupClearBits(egPiStates, STOPCALC);
 		}
 
 		if (getButtonPress(BUTTON2) == SHORT_PRESSED) {
-			xEventGroupSetBits(egPiStates, STOPCALC);
+//			xEventGroupSetBits(egPiStates, STOPCALC);
 			xEventGroupClearBits(egPiStates, STARTCALC);
 		}
 		
@@ -119,8 +120,9 @@ void vButton(void *pvParameters) {
 void vCalc(void *pvParameters) {
 	dPi4 = 1;
 	uint16_t calcstate = 0x0000;
+	i = 0;
 	
-	for(long i = 0;;i++) {
+	for(;;) {
 		
 		calcstate = xEventGroupGetBits(egPiStates);
 	//	xEventGroupWaitBits(egPiStates, STARTCALC, pdFALSE, pdFALSE, portMAX_DELAY);
@@ -128,11 +130,13 @@ void vCalc(void *pvParameters) {
 		if (calcstate & FINISHCALC) {
 			if (calcstate & STARTCALC) {
 				dPi4 = dPi4 - (1.0/(3+4*i)) + (1.0/(5+4*i));
+				i++;
 			}
 		}
-		if (calcstate & STOPCALC) {
+/*		if (calcstate & STOPCALC) {
 			// do nothing
 		}
+*/
 		if (calcstate & RESETCALC) {
 			dPi4 = 1;
 			i = 0;
