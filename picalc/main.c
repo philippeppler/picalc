@@ -38,6 +38,7 @@
 //#define STOPCALC	1<<1
 #define RESETCALC	1<<2
 #define FINISHCALC	1<<3
+#define TICK		1<<4
 EventGroupHandle_t egPiStates;
 
 extern void vApplicationIdleHook( void );
@@ -49,6 +50,7 @@ TaskHandle_t GUITask;
 
 double dPi4;
 long i;
+long Timems;
 
 
 void vApplicationIdleHook( void )
@@ -71,18 +73,25 @@ int main(void)
 }
 
 void vGUI(void *pvParameters) {
-	char Pi[10] = "";			
+	char Pi[15] = "";			
 	char Iter[15] = "";
+	char sTime[5] = "";
 	for(;;) {
 		
 		xEventGroupClearBits(egPiStates, FINISHCALC);
-		sprintf(Pi, "%f", 4*dPi4);
+		if (dPi4 != 1) {
+			sprintf(Pi, "%f", 4*dPi4);	
+		}
+		else {
+			sprintf(Pi, "press start");
+		}
 		sprintf(Iter, "%ld", i);
+		sprintf(sTime, "%ld", Timems);
 		vDisplayClear();
 		vDisplayWriteStringAtPos(0,0,"PI Calculator");
 		vDisplayWriteStringAtPos(1,0,"%s", Iter);
 		vDisplayWriteStringAtPos(2,0,"Pi: %s", Pi);
-		vDisplayWriteStringAtPos(3,0,"Zeit: xxxxxxms");
+		vDisplayWriteStringAtPos(3,0,"Zeit: %s ms",sTime);
 		xEventGroupSetBits(egPiStates, FINISHCALC);
 		
 		vTaskDelay(500 / portTICK_RATE_MS);
@@ -96,12 +105,15 @@ void vButton(void *pvParameters) {
 		updateButtons();
 		if (getButtonPress(BUTTON1) == SHORT_PRESSED) {
 			xEventGroupSetBits(egPiStates, STARTCALC);
+			TCD0.CTRLA = TC_CLKSEL_DIV1_gc ;						// Timer starten
 //			xEventGroupClearBits(egPiStates, STOPCALC);
 		}
 
 		if (getButtonPress(BUTTON2) == SHORT_PRESSED) {
 //			xEventGroupSetBits(egPiStates, STOPCALC);
 			xEventGroupClearBits(egPiStates, STARTCALC);
+			TCD0.CTRLA = TC_CLKSEL_OFF_gc ;							// Timer stoppen
+
 		}
 		
 		if (getButtonPress(BUTTON3) == SHORT_PRESSED) {
@@ -122,6 +134,11 @@ void vCalc(void *pvParameters) {
 	uint16_t calcstate = 0x0000;
 	i = 0;
 	
+	TCD0.CTRLA = TC_CLKSEL_OFF_gc ;
+	TCD0.CTRLB = 0x00;
+	TCD0.INTCTRLA = 0x03;
+	TCD0.PER = 32000-1;							// Zeit mit KO Abgleichen, allenfalls hier korrigieren!!
+	
 	for(;;) {
 		
 		calcstate = xEventGroupGetBits(egPiStates);
@@ -131,6 +148,9 @@ void vCalc(void *pvParameters) {
 			if (calcstate & STARTCALC) {
 				dPi4 = dPi4 - (1.0/(3+4*i)) + (1.0/(5+4*i));
 				i++;
+				if (dPi4 < 0.78539975 ) {
+					TCD0.CTRLA = TC_CLKSEL_OFF_gc ;
+				}
 			}
 		}
 /*		if (calcstate & STOPCALC) {
@@ -140,17 +160,17 @@ void vCalc(void *pvParameters) {
 		if (calcstate & RESETCALC) {
 			dPi4 = 1;
 			i = 0;
+			Timems = 0;
 			xEventGroupClearBits(egPiStates, RESETCALC);
 		}
-		
-		 
-		
-		
-		
-		
-		//vTaskDelay(1/portTICK_RATE_MS);
 	}
-	
 }
 	
-	
+
+ISR(TCD0_OVF_vect)
+{
+	BaseType_t xHigherPriorityTaskWoken;
+	xHigherPriorityTaskWoken = pdFALSE;
+	Timems++;
+	//xEventGroupSetBitsFromISR(egPiStates, TICK, &xHigherPriorityTaskWoken);
+}
