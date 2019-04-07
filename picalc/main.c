@@ -21,7 +21,6 @@
 #include "queue.h"
 #include "event_groups.h"
 #include "stack_macros.h"
-//#include "math.h"
 
 #include "mem_check.h"
 
@@ -31,11 +30,8 @@
 #include "NHD0420Driver.h"
 #include "ButtonHandler.h"
 
-#define ITERATIONS 1000000
-
 // EventGroup
 #define STARTCALC	1<<0
-//#define STOPCALC	1<<1
 #define RESETCALC	1<<2
 #define FINISHCALC	1<<3
 #define TICK		1<<4
@@ -108,19 +104,15 @@ void vButton(void *pvParameters) {
 		if (getButtonPress(BUTTON1) == SHORT_PRESSED) {
 			xEventGroupSetBits(egPiStates, STARTCALC);
 			TCD0.CTRLA = TC_CLKSEL_DIV1_gc ;						// Timer starten
-//			xEventGroupClearBits(egPiStates, STOPCALC);
 		}
 
 		if (getButtonPress(BUTTON2) == SHORT_PRESSED) {
-//			xEventGroupSetBits(egPiStates, STOPCALC);
 			xEventGroupClearBits(egPiStates, STARTCALC);
 			TCD0.CTRLA = TC_CLKSEL_OFF_gc ;							// Timer stoppen
-
 		}
 		
 		if (getButtonPress(BUTTON3) == SHORT_PRESSED) {
 			xEventGroupSetBits(egPiStates, RESETCALC);
-			
 		}		
 
 		if (getButtonPress(BUTTON4) == SHORT_PRESSED) {
@@ -140,12 +132,11 @@ void vCalc(void *pvParameters) {
 	TCD0.CTRLA = TC_CLKSEL_OFF_gc ;
 	TCD0.CTRLB = 0x00;
 	TCD0.INTCTRLA = 0x03;
-	TCD0.PER = 32000-1;							// Zeit mit KO Abgleichen, allenfalls hier korrigieren!!
+	TCD0.PER = 32000-1;							// Zeit mit KO kontrollieren, allenfalls hier korrigieren
 	
 	for(;;) {
 		
 		calcstate = xEventGroupGetBits(egPiStates);
-	//	xEventGroupWaitBits(egPiStates, STARTCALC, pdFALSE, pdFALSE, portMAX_DELAY);
 		
 		if (calcstate & FINISHCALC) {
 			if (calcstate & STARTCALC) {
@@ -156,15 +147,13 @@ void vCalc(void *pvParameters) {
 				}
 			}
 		}
-/*		if (calcstate & STOPCALC) {
-			// do nothing
-		}
-*/
+
 		if (calcstate & RESETCALC) {
 			dPi4 = 1;
 			i = 0;
 			Timems = 0;
 			xEventGroupClearBits(egPiStates, RESETCALC);
+			TCD0.CTRLA = TC_CLKSEL_DIV1_gc ;						// Timer starten
 		}
 	}
 }
@@ -172,9 +161,6 @@ void vCalc(void *pvParameters) {
 
 ISR(TCD0_OVF_vect)
 {
-	BaseType_t xHigherPriorityTaskWoken;
-	xHigherPriorityTaskWoken = pdFALSE;
 	Timems++;
 	PORTF.OUTTGL = PIN0_bm;			//LED1
-	//xEventGroupSetBitsFromISR(egPiStates, TICK, &xHigherPriorityTaskWoken);
 }
