@@ -68,6 +68,8 @@ int main(void)
 	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE, NULL, 2, &GUITask);
 	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
+	PORTF.DIRSET = PIN0_bm;						//LED1
+	
 	vTaskStartScheduler();
 	return 0;
 }
@@ -134,6 +136,7 @@ void vCalc(void *pvParameters) {
 	uint16_t calcstate = 0x0000;
 	i = 0;
 	
+	
 	TCD0.CTRLA = TC_CLKSEL_OFF_gc ;
 	TCD0.CTRLB = 0x00;
 	TCD0.INTCTRLA = 0x03;
@@ -148,7 +151,7 @@ void vCalc(void *pvParameters) {
 			if (calcstate & STARTCALC) {
 				dPi4 = dPi4 - (1.0/(3+4*i)) + (1.0/(5+4*i));
 				i++;
-				if (dPi4 < 0.78539975 ) {
+				if (dPi4 < 0.7854 ) {
 					TCD0.CTRLA = TC_CLKSEL_OFF_gc ;
 				}
 			}
@@ -172,5 +175,6 @@ ISR(TCD0_OVF_vect)
 	BaseType_t xHigherPriorityTaskWoken;
 	xHigherPriorityTaskWoken = pdFALSE;
 	Timems++;
+	PORTF.OUTTGL = PIN0_bm;			//LED1
 	//xEventGroupSetBitsFromISR(egPiStates, TICK, &xHigherPriorityTaskWoken);
 }
