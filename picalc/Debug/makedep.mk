@@ -2,8 +2,6 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
-avr_f64.c
-
 ButtonHandler.c
 
 driver\clksys_driver.c
