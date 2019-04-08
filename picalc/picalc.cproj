@@ -317,6 +317,9 @@
     <None Include="ES_U_CalculatingPI.pdf">
       <SubType>compile</SubType>
     </None>
+    <None Include="PiCalc.docx">
+      <SubType>compile</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>
