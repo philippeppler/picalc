@@ -30,9 +30,6 @@
 #include "NHD0420Driver.h"
 #include "ButtonHandler.h"
 
-#include "avr_f64.h"												//Library Include
-
-
 // EventGroup
 #define STARTCALC	1<<0
 #define RESETCALC	1<<2
@@ -47,7 +44,7 @@ void vCalc(void *pvParameters);
 
 TaskHandle_t GUITask;
 
-float64_t dPi4;
+double dPi4;
 long i;
 long Timems;
 
@@ -65,7 +62,7 @@ int main(void)
 	
 	xTaskCreate( vButton, (const char *) "Button", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE, NULL, 2, &GUITask);
-	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE+300, NULL, 1, NULL);
+	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
 	PORTF.DIRSET = PIN0_bm;						//LED1
 	
@@ -74,27 +71,24 @@ int main(void)
 }
 
 void vGUI(void *pvParameters) {
-	(void) pvParameters;
-	char sPi[17] = "";			
+	char Pi[15] = "";			
 	char Iter[15] = "";
 	char sTime[5] = "";
 	for(;;) {
 		
 		xEventGroupClearBits(egPiStates, FINISHCALC);
 		if (dPi4 != 1) {
-			//long dPi4Temp = dPi4 * 4;
-			char* stempResult = f_to_string(dPi4, 16, 16);
-			sprintf(sPi, "%s", stempResult)	;
+			sprintf(Pi, "%f", 4*dPi4);	
 		}
 		else {
-			sprintf(sPi, "press start");
+			sprintf(Pi, "press start");
 		}
 		sprintf(Iter, "%ld", i);
 		sprintf(sTime, "%ld", Timems);
 		vDisplayClear();
 		vDisplayWriteStringAtPos(0,0,"PI Calculator");
 		vDisplayWriteStringAtPos(1,0,"%s", Iter);
-		vDisplayWriteStringAtPos(2,0,"Pi: %s", sPi);
+		vDisplayWriteStringAtPos(2,0,"Pi: %s", Pi);
 		vDisplayWriteStringAtPos(3,0,"Zeit: %s ms",sTime);
 		xEventGroupSetBits(egPiStates, FINISHCALC);
 		
