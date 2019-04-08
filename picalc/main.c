@@ -30,6 +30,8 @@
 #include "NHD0420Driver.h"
 #include "ButtonHandler.h"
 
+#include "avr_f64.h"
+
 // EventGroup
 #define STARTCALC	1<<0
 #define RESETCALC	1<<2
@@ -42,9 +44,7 @@ void vGUI(void *pvParameters);
 void vButton(void *pvParameters);
 void vCalc(void *pvParameters);
 
-TaskHandle_t GUITask;
-
-double dPi4;
+float64_t dPi4;
 long i;
 long Timems;
 
@@ -61,7 +61,7 @@ int main(void)
 	egPiStates = xEventGroupCreate();
 	
 	xTaskCreate( vButton, (const char *) "Button", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
-	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE, NULL, 2, &GUITask);
+	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE+400, NULL, 2, NULL);
 	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
 	PORTF.DIRSET = PIN0_bm;						//LED1
@@ -78,7 +78,8 @@ void vGUI(void *pvParameters) {
 		
 		xEventGroupClearBits(egPiStates, FINISHCALC);
 		if (dPi4 != 1) {
-			sprintf(Pi, "%f", 4*dPi4);	
+			char* stempResult = f_to_string(dPi4, 10, 10);
+			sprintf(Pi, "%s", stempResult);	
 		}
 		else {
 			sprintf(Pi, "press start");
@@ -124,7 +125,7 @@ void vButton(void *pvParameters) {
 }
 
 void vCalc(void *pvParameters) {
-	dPi4 = 1;
+	dPi4 = f_sd(1);
 	uint16_t calcstate = 0x0000;
 	i = 0;
 	
@@ -141,6 +142,7 @@ void vCalc(void *pvParameters) {
 		if (calcstate & FINISHCALC) {
 			if (calcstate & STARTCALC) {
 				dPi4 = dPi4 - (1.0/(3+4*i)) + (1.0/(5+4*i));
+				dPi4 = 3.141578965423658;
 				i++;
 				if (dPi4 < 0.7854 ) {
 					TCD0.CTRLA = TC_CLKSEL_OFF_gc ;
