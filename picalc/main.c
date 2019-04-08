@@ -141,11 +141,8 @@ void vCalc(void *pvParameters) {
 		
 		if (calcstate & FINISHCALC) {
 			if (calcstate & STARTCALC) {
-				float64_t testvar1 = f_sd(1.0/(3+4*i));									//Erstellen einer Double-Variable, Initialisiert mit dem Wert 2
-				float64_t testvar2 = f_sd(1.0/(5+4*i));
-				 
-	//			dPi4 = dPi4 - (1.0/(3+4*i)) + (1.0/(5+4*i));
-				dPi4 = f_sd(3.14157896);
+				dPi4 = dPi4 - (1.0/(3+4*i)) + (1.0/(5+4*i));
+				dPi4 = 3.141578965423658;
 				i++;
 				if (dPi4 < 0.7854 ) {
 					TCD0.CTRLA = TC_CLKSEL_OFF_gc ;
