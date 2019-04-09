@@ -94,7 +94,7 @@ void vGUI(void *pvParameters) {
 		vDisplayWriteStringAtPos(3,0,"Zeit: %s ms",sTime);
 		xEventGroupSetBits(egPiStates, FINISHCALC);
 		
-		vTaskDelay(500 / portTICK_RATE_MS);
+		vTaskDelayUntil(500 / portTICK_RATE_MS);
 	}
 }
 
