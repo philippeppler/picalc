@@ -63,8 +63,8 @@ int main(void)
 	egPiStates = xEventGroupCreate();
 	
 	xTaskCreate( vButton, (const char *) "Button", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
-	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
-	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE+100, NULL, 2, NULL);
+	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE+100, NULL, 1, NULL);
 
 	PORTF.DIRSET = PIN0_bm;						//LED1
 	

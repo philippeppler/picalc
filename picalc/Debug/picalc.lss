@@ -15,21 +15,19 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   5 .debug_aranges 00000810  00000000  00000000  00006b00  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   0000bb09  00000000  00000000  00007310  2**0
+  6 .debug_info   0000bacd  00000000  00000000  00007310  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000047c9  00000000  00000000  00012e19  2**0
+  7 .debug_abbrev 0000479c  00000000  00000000  00012ddd  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000076c0  00000000  00000000  000175e2  2**0
+  8 .debug_line   00005826  00000000  00000000  00017579  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00001f10  00000000  00000000  0001eca4  2**2
+  9 .debug_frame  00001f10  00000000  00000000  0001cda0  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00029cc4  00000000  00000000  00020bb4  2**0
+ 10 .debug_str    000055d6  00000000  00000000  0001ecb0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000041c0  00000000  00000000  0004a878  2**0
+ 11 .debug_loc    000041c0  00000000  00000000  00024286  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000728  00000000  00000000  0004ea38  2**0
-                  CONTENTS, READONLY, DEBUGGING
- 13 .debug_macro  0000a186  00000000  00000000  0004f160  2**0
+ 12 .debug_ranges 00000728  00000000  00000000  00028446  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -174,17 +172,17 @@ Disassembly of section .text:
      20e:	33 1e       	adc	r3, r19
 
 00000210 <__trampolines_start>:
-     210:	0c 94 5e 20 	jmp	0x40bc	; 0x40bc <vGUI>
-     214:	0c 94 c2 1b 	jmp	0x3784	; 0x3784 <prvTimerTask>
-     218:	0c 94 08 07 	jmp	0xe10	; 0xe10 <vEventGroupSetBitsCallback>
-     21c:	0c 94 e0 1d 	jmp	0x3bc0	; 0x3bc0 <prvProcessReceivedCommands+0xce>
-     220:	0c 94 33 1e 	jmp	0x3c66	; 0x3c66 <prvProcessReceivedCommands+0x174>
+     210:	0c 94 b6 25 	jmp	0x4b6c	; 0x4b6c <vDisplayUpdateTask>
+     214:	0c 94 61 1e 	jmp	0x3cc2	; 0x3cc2 <prvProcessReceivedCommands+0x1d0>
+     218:	0c 94 5e 20 	jmp	0x40bc	; 0x40bc <vGUI>
+     21c:	0c 94 1b 19 	jmp	0x3236	; 0x3236 <prvIdleTask>
+     220:	0c 94 67 1e 	jmp	0x3cce	; 0x3cce <prvProcessReceivedCommands+0x1dc>
      224:	0c 94 d4 21 	jmp	0x43a8	; 0x43a8 <vCalc>
-     228:	0c 94 88 21 	jmp	0x4310	; 0x4310 <vButton>
-     22c:	0c 94 67 1e 	jmp	0x3cce	; 0x3cce <prvProcessReceivedCommands+0x1dc>
-     230:	0c 94 1b 19 	jmp	0x3236	; 0x3236 <prvIdleTask>
-     234:	0c 94 b6 25 	jmp	0x4b6c	; 0x4b6c <vDisplayUpdateTask>
-     238:	0c 94 61 1e 	jmp	0x3cc2	; 0x3cc2 <prvProcessReceivedCommands+0x1d0>
+     228:	0c 94 c2 1b 	jmp	0x3784	; 0x3784 <prvTimerTask>
+     22c:	0c 94 08 07 	jmp	0xe10	; 0xe10 <vEventGroupSetBitsCallback>
+     230:	0c 94 33 1e 	jmp	0x3c66	; 0x3c66 <prvProcessReceivedCommands+0x174>
+     234:	0c 94 88 21 	jmp	0x4310	; 0x4310 <vButton>
+     238:	0c 94 e0 1d 	jmp	0x3bc0	; 0x3bc0 <prvProcessReceivedCommands+0xce>
 
 0000023c <__trampolines_end>:
      23c:	6e 61       	ori	r22, 0x1E	; 30
@@ -8367,27 +8365,27 @@ int main(void)
     4060:	88 e8       	ldi	r24, 0x88	; 136
     4062:	91 e2       	ldi	r25, 0x21	; 33
     4064:	0e 94 e7 11 	call	0x23ce	; 0x23ce <xTaskCreate>
-	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE+100, NULL, 2, NULL);
     4068:	e1 2c       	mov	r14, r1
     406a:	f1 2c       	mov	r15, r1
     406c:	02 e0       	ldi	r16, 0x02	; 2
     406e:	20 e0       	ldi	r18, 0x00	; 0
     4070:	30 e0       	ldi	r19, 0x00	; 0
-    4072:	48 ec       	ldi	r20, 0xC8	; 200
-    4074:	50 e0       	ldi	r21, 0x00	; 0
+    4072:	4c e2       	ldi	r20, 0x2C	; 44
+    4074:	51 e0       	ldi	r21, 0x01	; 1
     4076:	64 e1       	ldi	r22, 0x14	; 20
     4078:	70 e2       	ldi	r23, 0x20	; 32
     407a:	8e e5       	ldi	r24, 0x5E	; 94
     407c:	90 e2       	ldi	r25, 0x20	; 32
     407e:	0e 94 e7 11 	call	0x23ce	; 0x23ce <xTaskCreate>
-	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE+100, NULL, 1, NULL);
     4082:	e1 2c       	mov	r14, r1
     4084:	f1 2c       	mov	r15, r1
     4086:	01 e0       	ldi	r16, 0x01	; 1
     4088:	20 e0       	ldi	r18, 0x00	; 0
     408a:	30 e0       	ldi	r19, 0x00	; 0
-    408c:	48 ec       	ldi	r20, 0xC8	; 200
-    408e:	50 e0       	ldi	r21, 0x00	; 0
+    408c:	4c e2       	ldi	r20, 0x2C	; 44
+    408e:	51 e0       	ldi	r21, 0x01	; 1
     4090:	6c e1       	ldi	r22, 0x1C	; 28
     4092:	70 e2       	ldi	r23, 0x20	; 32
     4094:	84 ed       	ldi	r24, 0xD4	; 212
