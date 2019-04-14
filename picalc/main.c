@@ -38,7 +38,7 @@
 EventGroupHandle_t egPiStates;
 
 extern void vApplicationIdleHook( void );
-void vGUI(void *pvParameters);
+void vUI(void *pvParameters);
 void vButton(void *pvParameters);
 void vCalc(void *pvParameters);
 
@@ -56,14 +56,14 @@ void vApplicationIdleHook( void )
 
 int main(void)
 {
-	resetReason_t reason = getResetReason();
+	//resetReason_t reason = getResetReason();
 	
 	vInitClock();
 	vInitDisplay();
 	egPiStates = xEventGroupCreate();
 	
 	xTaskCreate( vButton, (const char *) "Button", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
-	xTaskCreate( vGUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE+100, NULL, 2, NULL);
+	xTaskCreate( vUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE+100, NULL, 2, NULL);
 	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE+100, NULL, 1, NULL);
 
 	PORTF.DIRSET = PIN0_bm;						//LED1
@@ -72,10 +72,12 @@ int main(void)
 	return 0;
 }
 
-void vGUI(void *pvParameters) {
+void vUI(void *pvParameters) {
 	char Pi[15] = "";			
 	char Iter[15] = "";
 	char sTime[5] = "";
+	TickType_t xLastWakeTime;
+	
 	for(;;) {
 		
 		xEventGroupClearBits(egPiStates, FINISHCALC);
@@ -93,8 +95,9 @@ void vGUI(void *pvParameters) {
 		vDisplayWriteStringAtPos(2,0,"Pi: %s", Pi);
 		vDisplayWriteStringAtPos(3,0,"Zeit: %s ms",sTime);
 		xEventGroupSetBits(egPiStates, FINISHCALC);
+		xLastWakeTime = xTaskGetTickCount();
 		
-		vTaskDelayUntil(500 / portTICK_RATE_MS);
+		vTaskDelayUntil(&xLastWakeTime, 500 / portTICK_RATE_MS);
 	}
 }
 
@@ -117,9 +120,6 @@ void vButton(void *pvParameters) {
 			xEventGroupSetBits(egPiStates, RESETCALC);
 		}		
 
-		if (getButtonPress(BUTTON4) == SHORT_PRESSED) {
-
-		}
 
 		vTaskDelay((1000/BUTTON_UPDATE_FREQUENCY_HZ)/portTICK_RATE_MS);
 	}
