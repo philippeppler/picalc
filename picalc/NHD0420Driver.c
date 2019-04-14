@@ -135,7 +135,7 @@ ISR(TCF0_OVF_vect) {
 	egDisplayTiming = xEventGroupCreate();
 	
 
-	xTaskCreate(vDisplayUpdateTask, (const char*) "dispUpdate", configMINIMAL_STACK_SIZE+150, NULL, 1, NULL);	
+	xTaskCreate(vDisplayUpdateTask, (const char*) "dispUpdate", configMINIMAL_STACK_SIZE+150, NULL, 2, NULL);	//von Hand auf Prio 2 gestellt
  }
  
  void _displaySetPos(int line, int pos) {
