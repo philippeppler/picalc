@@ -8636,7 +8636,7 @@ void vUI(void *pvParameters) {
     426e:	e9 f7       	brne	.-6      	; 0x426a <vUI+0x48>
 	TickType_t xLastWakeTime;
 	
-	for(;;) {
+	while (1) {
 		
 		xEventGroupClearBits(egPiStates, FINISHCALC);
     4270:	80 91 ed 2c 	lds	r24, 0x2CED	; 0x802ced <egPiStates>
@@ -9037,7 +9037,7 @@ void vCalc(void *pvParameters) {
     4584:	26 a3       	std	Z+38, r18	; 0x26
     4586:	37 a3       	std	Z+39, r19	; 0x27
 	
-	for(;;) {
+	while (1) {
 		
 		calcstate = xEventGroupGetBits(egPiStates);
     4588:	80 91 ed 2c 	lds	r24, 0x2CED	; 0x802ced <egPiStates>

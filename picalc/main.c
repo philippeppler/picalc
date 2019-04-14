@@ -34,7 +34,6 @@
 #define STARTCALC	1<<0
 #define RESETCALC	1<<2
 #define FINISHCALC	1<<3
-#define TICK		1<<4
 EventGroupHandle_t egPiStates;
 
 extern void vApplicationIdleHook( void );
@@ -44,9 +43,9 @@ void vCalc(void *pvParameters);
 
 TaskHandle_t GUITask;
 
-double dPi4;
-long i;
-long Timems;
+double dPi4;			// Pi/4 für Berechnung mit Leibniz-Reihe
+long i;					// Anzahl Iterationen
+long Timems;			// 1ms-Zähler
 
 
 void vApplicationIdleHook( void )
@@ -78,14 +77,14 @@ void vUI(void *pvParameters) {
 	char sTime[5] = "";
 	TickType_t xLastWakeTime;
 	
-	for(;;) {
+	while (1) {
 		
-		xEventGroupClearBits(egPiStates, FINISHCALC);
-		if (dPi4 != 1) {
-			sprintf(Pi, "%f", 4*dPi4);	
+		xEventGroupClearBits(egPiStates, FINISHCALC);			// FINISHCALC = 0
+		if (dPi4 != 1) {										// wenn nicht Initialwert
+			sprintf(Pi, "%f", 4*dPi4);								// Pi als String ausgeben
 		}
 		else {
-			sprintf(Pi, "press start");
+			sprintf(Pi, "press start");								// Sonst "press start" ausgeben
 		}
 		sprintf(Iter, "%ld", i);
 		sprintf(sTime, "%ld", Timems);
@@ -94,10 +93,10 @@ void vUI(void *pvParameters) {
 		vDisplayWriteStringAtPos(1,0,"%s", Iter);
 		vDisplayWriteStringAtPos(2,0,"Pi: %s", Pi);
 		vDisplayWriteStringAtPos(3,0,"Zeit: %s ms",sTime);
-		xEventGroupSetBits(egPiStates, FINISHCALC);
-		xLastWakeTime = xTaskGetTickCount();
+		xEventGroupSetBits(egPiStates, FINISHCALC);				// FINISHCALC = 1
 		
-		vTaskDelayUntil(&xLastWakeTime, 500 / portTICK_RATE_MS);
+		xLastWakeTime = xTaskGetTickCount();
+		vTaskDelayUntil(&xLastWakeTime, 500 / portTICK_RATE_MS); // Pausenzeit genau 500ms
 	}
 }
 
@@ -106,22 +105,22 @@ void vButton(void *pvParameters) {
 	
 	while (1) {
 		updateButtons();
-		if (getButtonPress(BUTTON1) == SHORT_PRESSED) {
-			xEventGroupSetBits(egPiStates, STARTCALC);
-			TCD0.CTRLA = TC_CLKSEL_DIV1_gc ;						// Timer starten
+		if (getButtonPress(BUTTON1) == SHORT_PRESSED) {				// Wenn Button1 gedrückt
+			xEventGroupSetBits(egPiStates, STARTCALC);					// STARTCALC = 1
+			TCD0.CTRLA = TC_CLKSEL_DIV1_gc ;							// Timer starten
 		}
 
-		if (getButtonPress(BUTTON2) == SHORT_PRESSED) {
-			xEventGroupClearBits(egPiStates, STARTCALC);
-			TCD0.CTRLA = TC_CLKSEL_OFF_gc ;							// Timer stoppen
+		if (getButtonPress(BUTTON2) == SHORT_PRESSED) {				// Wenn Button2 gedrückt
+			xEventGroupClearBits(egPiStates, STARTCALC);				// STARTCALC = 0
+			TCD0.CTRLA = TC_CLKSEL_OFF_gc ;								// Timer stoppen
 		}
 		
-		if (getButtonPress(BUTTON3) == SHORT_PRESSED) {
-			xEventGroupSetBits(egPiStates, RESETCALC);
+		if (getButtonPress(BUTTON3) == SHORT_PRESSED) {				// Wenn Button3 gedrückt
+			xEventGroupSetBits(egPiStates, RESETCALC);					// RESETCALC = 1
 		}		
 
 
-		vTaskDelay((1000/BUTTON_UPDATE_FREQUENCY_HZ)/portTICK_RATE_MS);
+		vTaskDelay((1000/BUTTON_UPDATE_FREQUENCY_HZ)/portTICK_RATE_MS);	// Delay 10ms
 	}
 }
 
@@ -131,26 +130,26 @@ void vCalc(void *pvParameters) {
 	i = 0;
 	
 	
-	TCD0.CTRLA = TC_CLKSEL_OFF_gc ;
+	TCD0.CTRLA = TC_CLKSEL_OFF_gc ;				// 1ms Timer Initialisieren, aber nicht starten
 	TCD0.CTRLB = 0x00;
 	TCD0.INTCTRLA = 0x03;
-	TCD0.PER = 32000-1;							// Zeit mit KO kontrollieren, allenfalls hier korrigieren
+	TCD0.PER = 32000-1;								// Zeit mit KO kontrollieren, allenfalls hier korrigieren
 	
-	for(;;) {
+	while (1) {
 		
-		calcstate = xEventGroupGetBits(egPiStates);
+		calcstate = xEventGroupGetBits(egPiStates);				// EventBits aufrufen
 		
-		if (calcstate & FINISHCALC) {
-			if (calcstate & STARTCALC) {
-				dPi4 = dPi4 - (1.0/(3+4*i)) + (1.0/(5+4*i));
+		if (calcstate & FINISHCALC) {							// Wenn FINISHCALC = 1
+			if (calcstate & STARTCALC) {							// Wenn STARTCALC = 1
+				dPi4 = dPi4 - (1.0/(3+4*i)) + (1.0/(5+4*i));		// Pi mit Leibniz-Reihe berechnen
 				i++;
-				if (dPi4 < 0.7854 ) {
-					TCD0.CTRLA = TC_CLKSEL_OFF_gc ;
+				if (dPi4 < 0.7854 ) {								// Wenn Pi auf 5 Kommastellen genau
+					TCD0.CTRLA = TC_CLKSEL_OFF_gc ;						// 1ms Timer stoppen
 				}
 			}
 		}
-		if (calcstate & RESETCALC) {
-				dPi4 = 1;
+		if (calcstate & RESETCALC) {							// Wenn RESETCALC = 1
+				dPi4 = 1;											// auf Initialwerte zurücksetzen
 				i = 0;
 				Timems = 0;
 				xEventGroupClearBits(egPiStates, RESETCALC);
@@ -161,6 +160,6 @@ void vCalc(void *pvParameters) {
 
 ISR(TCD0_OVF_vect)
 {
-	Timems++;
-	PORTF.OUTTGL = PIN0_bm;			//LED1
+	Timems++;													// 1ms-Zähler inkrementieren
+	PORTF.OUTTGL = PIN0_bm;										//LED1 toggeln
 }
