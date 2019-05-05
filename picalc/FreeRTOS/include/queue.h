@@ -141,44 +141,7 @@ typedef void * QueueSetMemberHandle_t;
  * \ingroup QueueManagement
  */
 #if( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-	#define xQueueCreate( uxQueueLength, uxItemSize ) xQueueGenericCreate( ( uxQueueLength ), ( uxItemSize ), ( queueQUEUE_TYPE_BASE ) )
-#endif
-
-/**
- * queue. h
- * <pre>
- QueueHandle_t xQueueCreateStatic(
-							  UBaseType_t uxQueueLength,
-							  UBaseType_t uxItemSize,
-							  uint8_t *pucQueueStorageBuffer,
-							  StaticQueue_t *pxQueueBuffer
-						  );
- * </pre>
- *
- * Creates a new queue instance, and returns a handle by which the new queue
- * can be referenced.
- *
- * Internally, within the FreeRTOS implementation, queues use two blocks of
- * memory.  The first block is used to hold the queue's data structures.  The
- * second block is used to hold items placed into the queue.  If a queue is
- * created using xQueueCreate() then both blocks of memory are automatically
- * dynamically allocated inside the xQueueCreate() function.  (see
- * http://www.freertos.org/a00111.html).  If a queue is created using
- * xQueueCreateStatic() then the application writer must provide the memory that
- * will get used by the queue.  xQueueCreateStatic() therefore allows a queue to
- * be created without using any dynamic memory allocation.
- *
- * http://www.FreeRTOS.org/Embedded-RTOS-Queues.html
- *
- * @param uxQueueLength The maximum number of items that the queue can contain.
- *
- * @param uxItemSize The number of bytes each item in the queue will require.
- * Items are queued by copy, not by reference, so this is the number of bytes
- * that will be copied for each posted item.  Each item on the queue must be
- * the same size.
- *
- * @param pucQueueStorageBuffer If uxItemSize is not zero then
- * pucQueueStorageBuffer must point to a uint8_t array that is at least large
+	#define xQueueCreate( uxQueueLength, uxItemSize ) a uint8_t array that is at least large
  * enough to hold the maximum number of items that can be in the queue at any
  * one time - which is ( uxQueueLength * uxItemsSize ) bytes.  If uxItemSize is
  * zero then pucQueueStorageBuffer can be NULL.

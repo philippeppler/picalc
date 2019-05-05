@@ -23,6 +23,7 @@
 #include "stack_macros.h"
 
 #include "mem_check.h"
+#include "queue.h"
 
 #include "init.h"
 #include "utils.h"
@@ -41,11 +42,11 @@ void vUI(void *pvParameters);
 void vButton(void *pvParameters);
 void vCalc(void *pvParameters);
 
-TaskHandle_t GUITask;
-
 double dPi4;			// Pi/4 für Berechnung mit Leibniz-Reihe
 long i;					// Anzahl Iterationen
 long Timems;			// 1ms-Zähler
+QueueHandle_t ButtonQueue;
+char x;
 
 
 void vApplicationIdleHook( void )
@@ -64,7 +65,8 @@ int main(void)
 	xTaskCreate( vButton, (const char *) "Button", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 	xTaskCreate( vUI, (const char *) "GUITask", configMINIMAL_STACK_SIZE+100, NULL, 2, NULL);
 	xTaskCreate( vCalc, (const char *) "Calc", configMINIMAL_STACK_SIZE+100, NULL, 1, NULL);
-
+	ButtonQueue xQueueCreate(10, sizeof(x));
+	
 	PORTF.DIRSET = PIN0_bm;						//LED1
 	
 	vTaskStartScheduler();
@@ -108,15 +110,19 @@ void vButton(void *pvParameters) {
 		if (getButtonPress(BUTTON1) == SHORT_PRESSED) {				// Wenn Button1 gedrückt
 			xEventGroupSetBits(egPiStates, STARTCALC);					// STARTCALC = 1
 			TCD0.CTRLA = TC_CLKSEL_DIV1_gc ;							// Timer starten
+			
+			xQueueSendToBack(ButtonQueue, '1', 99999);
 		}
 
 		if (getButtonPress(BUTTON2) == SHORT_PRESSED) {				// Wenn Button2 gedrückt
 			xEventGroupClearBits(egPiStates, STARTCALC);				// STARTCALC = 0
 			TCD0.CTRLA = TC_CLKSEL_OFF_gc ;								// Timer stoppen
+
 		}
 		
 		if (getButtonPress(BUTTON3) == SHORT_PRESSED) {				// Wenn Button3 gedrückt
 			xEventGroupSetBits(egPiStates, RESETCALC);					// RESETCALC = 1
+
 		}		
 
 
